@@ -29,7 +29,7 @@ class VpnProvider extends ChangeNotifier {
   Timer? _connectionTimer;
   Timer? _refreshTimer;
   bool _disposed = false;
-  Duration _connectionDuration = Duration.zero;
+  final connectionDurationNotifier = ValueNotifier<Duration>(Duration.zero);
   DateTime? _connectedAt;
   int _reconnectCount = 0;
   bool _serverWentOffline = false;
@@ -47,7 +47,7 @@ class VpnProvider extends ChangeNotifier {
   String? get stageName => _stageName;
   String? get errorMessage => _errorMessage;
   bool get isLoadingServers => _isLoadingServers;
-  Duration get connectionDuration => _connectionDuration;
+  Duration get connectionDuration => connectionDurationNotifier.value;
   Set<String> get favoriteIps => _favoriteIps;
 
   bool get serverWentOffline => _serverWentOffline;
@@ -463,24 +463,23 @@ class VpnProvider extends ChangeNotifier {
   void _startTimer() {
     _connectionTimer?.cancel();
     if (_connectedAt != null) {
-      _connectionDuration = DateTime.now().difference(_connectedAt!);
+      connectionDurationNotifier.value = DateTime.now().difference(_connectedAt!);
     } else {
-      _connectionDuration = Duration.zero;
+      connectionDurationNotifier.value = Duration.zero;
     }
     _connectionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_connectedAt != null) {
-        _connectionDuration = DateTime.now().difference(_connectedAt!);
+        connectionDurationNotifier.value = DateTime.now().difference(_connectedAt!);
       } else {
-        _connectionDuration += const Duration(seconds: 1);
+        connectionDurationNotifier.value += const Duration(seconds: 1);
       }
-      notifyListeners();
     });
   }
 
   void _stopTimer() {
     _connectionTimer?.cancel();
     _connectionTimer = null;
-    _connectionDuration = Duration.zero;
+    connectionDurationNotifier.value = Duration.zero;
   }
 
   Future<void> _saveConnectionState() async {
@@ -566,6 +565,7 @@ class VpnProvider extends ChangeNotifier {
     _connectionTimer?.cancel();
     _refreshTimer?.cancel();
     _switchDelayTimer?.cancel();
+    connectionDurationNotifier.dispose();
     super.dispose();
   }
 }

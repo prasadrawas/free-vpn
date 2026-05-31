@@ -10,12 +10,13 @@ class ConnectionTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<VpnProvider>(
-      builder: (context, provider, _) {
-        final isConnected =
-            provider.connectionStatus == ConnectionStatus.connected;
-        final duration = provider.connectionDuration;
+    final provider = context.watch<VpnProvider>();
+    final isConnected =
+        provider.connectionStatus == ConnectionStatus.connected;
 
+    return ValueListenableBuilder<Duration>(
+      valueListenable: provider.connectionDurationNotifier,
+      builder: (context, duration, _) {
         final hours = duration.inHours.toString().padLeft(2, '0');
         final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
         final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
