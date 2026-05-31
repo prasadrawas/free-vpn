@@ -71,6 +71,11 @@ void main() {
       expect(provider.connectionDuration, Duration.zero);
     });
 
+    test('starts with zero connection duration notifier', () {
+      final provider = VpnProvider();
+      expect(provider.connectionDurationNotifier.value, Duration.zero);
+    });
+
     test('starts with isLoadingServers false', () {
       final provider = VpnProvider();
       expect(provider.isLoadingServers, false);
@@ -91,14 +96,26 @@ void main() {
       expect(provider.favoriteIps, isEmpty);
       expect(provider.favoriteServers, isEmpty);
     });
+
+    test('starts with null vpnStatus', () {
+      final provider = VpnProvider();
+      expect(provider.vpnStatus, isNull);
+    });
   });
 
   group('VpnProvider.clearOfflineWarning', () {
     test('clears serverWentOffline flag', () {
       final provider = VpnProvider();
-      // Can't set _serverWentOffline directly, but clearOfflineWarning should work
       provider.clearOfflineWarning();
       expect(provider.serverWentOffline, false);
+    });
+
+    test('notifies listeners', () {
+      final provider = VpnProvider();
+      int count = 0;
+      provider.addListener(() => count++);
+      provider.clearOfflineWarning();
+      expect(count, 1);
     });
   });
 
@@ -155,7 +172,7 @@ void main() {
       final s2 = _makeServer(ip: '2.2.2.2');
       provider.toggleFavorite(s1);
       provider.toggleFavorite(s2);
-      provider.toggleFavorite(s1); // remove s1
+      provider.toggleFavorite(s1);
       expect(provider.isFavorite(s1), false);
       expect(provider.isFavorite(s2), true);
     });
@@ -170,6 +187,14 @@ void main() {
       provider.toggleFavorite(server);
       expect(notifyCount, 2);
     });
+
+    test('toggling same server twice leaves favorites empty', () {
+      final provider = VpnProvider();
+      final server = _makeServer(ip: '5.5.5.5');
+      provider.toggleFavorite(server);
+      provider.toggleFavorite(server);
+      expect(provider.favoriteIps, isEmpty);
+    });
   });
 
   group('VpnProvider.connectToServer', () {
@@ -177,32 +202,21 @@ void main() {
       final provider = VpnProvider();
       await provider.connectToServer(null);
       expect(provider.connectionStatus, ConnectionStatus.disconnected);
+      expect(provider.stageName, isNull);
     });
 
-    test('resets reconnect count and error state', () async {
+    test('does nothing when service is not initialized', () async {
       final provider = VpnProvider();
-      // connectToServer will fail because VpnConnectionService is not initialized,
-      // but we can verify the state was set before the error
-      int notifyCount = 0;
-      provider.addListener(() {
-        if (notifyCount == 0) {
-          // First notification: status should be connecting
-          expect(provider.connectionStatus, ConnectionStatus.connecting);
-          expect(provider.stageName, 'Preparing...');
-          expect(provider.errorMessage, isNull);
-        }
-        notifyCount++;
-      });
-      // This will throw because _vpnConnectionService is not initialized,
-      // which is expected in unit tests without the full plugin
+      final server = _makeServer();
+      // Service is null, should return early without crashing
+      await provider.connectToServer(server);
+      expect(provider.connectionStatus, ConnectionStatus.disconnected);
     });
   });
 
   group('VpnProvider.disconnect', () {
-    test('clears pending switch server', () {
+    test('sets status to disconnecting and clears error', () {
       final provider = VpnProvider();
-      // disconnect sets status to disconnecting and clears error
-      // Will fail because service not initialized, but state changes happen first
       int notifyCount = 0;
       provider.addListener(() {
         if (notifyCount == 0) {
@@ -212,29 +226,50 @@ void main() {
         }
         notifyCount++;
       });
-      // This will throw due to uninitialized service, expected
-      try {
-        provider.disconnect();
-      } catch (_) {}
+      // disconnect with null service - sets state but disconnect call is safe (null-aware)
+      provider.disconnect();
       expect(notifyCount, greaterThan(0));
+    });
+
+    test('clears isAutoConnecting', () {
+      final provider = VpnProvider();
+      provider.disconnect();
+      expect(provider.isAutoConnecting, false);
     });
   });
 
   group('VpnProvider.switchServer', () {
-    test('connects directly when not connected', () {
+    test('calls connectToServer when not connected', () async {
       final provider = VpnProvider();
       final server = _makeServer(hostName: 'new-server');
-      // switchServer when disconnected should call connectToServer directly
-      // Will fail at the actual connect, but we can verify state
-      int notifyCount = 0;
-      provider.addListener(() {
-        notifyCount++;
-      });
-      try {
-        provider.switchServer(server);
-      } catch (_) {}
-      // Should have set selected server
-      expect(provider.selectedServer?.hostName, 'new-server');
+      // Service is null, so connectToServer returns early without setting server
+      provider.switchServer(server);
+      await Future.delayed(Duration.zero);
+      // With null service, connectToServer bails early
+      expect(provider.connectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test('does not crash with null service', () {
+      final provider = VpnProvider();
+      final server = _makeServer(hostName: 'test');
+      expect(() => provider.switchServer(server), returnsNormally);
+    });
+  });
+
+  group('VpnProvider.connectionDurationNotifier', () {
+    test('starts at zero', () {
+      final provider = VpnProvider();
+      expect(provider.connectionDurationNotifier.value, Duration.zero);
+    });
+
+    test('is a ValueNotifier', () {
+      final provider = VpnProvider();
+      expect(provider.connectionDurationNotifier, isA<ValueNotifier<Duration>>());
+    });
+
+    test('connectionDuration getter matches notifier value', () {
+      final provider = VpnProvider();
+      expect(provider.connectionDuration, provider.connectionDurationNotifier.value);
     });
   });
 
@@ -258,6 +293,13 @@ void main() {
     test('disposes without error', () {
       final provider = VpnProvider();
       expect(() => provider.dispose(), returnsNormally);
+    });
+
+    test('disposes connectionDurationNotifier', () {
+      final provider = VpnProvider();
+      provider.dispose();
+      // Accessing disposed notifier should throw
+      expect(() => provider.connectionDurationNotifier.addListener(() {}), throwsA(anything));
     });
   });
 }

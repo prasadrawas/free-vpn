@@ -64,6 +64,18 @@ void main() {
         final server = _makeServer(countryShort: 'JPN');
         expect(server.flagEmoji, '');
       });
+
+      test('handles lowercase country code', () {
+        final lower = _makeServer(countryShort: 'jp');
+        final upper = _makeServer(countryShort: 'JP');
+        expect(lower.flagEmoji, upper.flagEmoji);
+      });
+
+      test('handles mixed case country code', () {
+        final mixed = _makeServer(countryShort: 'jP');
+        final upper = _makeServer(countryShort: 'JP');
+        expect(mixed.flagEmoji, upper.flagEmoji);
+      });
     });
 
     group('speedMbps', () {
