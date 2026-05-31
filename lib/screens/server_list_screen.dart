@@ -30,9 +30,10 @@ class _ServerListScreenState extends State<ServerListScreen> {
         builder: (context, provider, _) {
           final servers = _filteredServers(provider.servers);
           final favorites = _filteredServers(provider.favoriteServers);
-          final maxSpeed = provider.servers.isEmpty
+          final rawMaxSpeed = provider.servers.isEmpty
               ? 1.0
               : provider.servers.first.speed.toDouble();
+          final maxSpeed = rawMaxSpeed > 0 ? rawMaxSpeed : 1.0;
 
           return CustomScrollView(
             slivers: [
