@@ -51,3 +51,9 @@ android/key.properties
 
 # Firebase config
 android/app/google-services.json
+
+# Local tool configs
+.claude/
+.fvm/
+.fvmrc
+.metadata
