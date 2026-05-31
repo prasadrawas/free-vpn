@@ -37,6 +37,7 @@ class VpnProvider extends ChangeNotifier {
   Set<String> _onlineServerIps = {};
   Completer<bool>? _connectionCompleter;
   VpnServer? _pendingSwitchServer;
+  Timer? _switchDelayTimer;
 
   // Getters
   List<VpnServer> get servers => _servers;
@@ -236,6 +237,7 @@ class VpnProvider extends ChangeNotifier {
 
   void switchServer(VpnServer server) {
     Log.d('Switch: from ${_selectedServer?.hostName} to ${server.hostName} (${server.ip}), status=$_connectionStatus');
+    _switchDelayTimer?.cancel();
     _pendingSwitchServer = server;
     if (_connectionStatus == ConnectionStatus.connected ||
         _connectionStatus == ConnectionStatus.connecting) {
@@ -257,6 +259,7 @@ class VpnProvider extends ChangeNotifier {
 
   void disconnect() {
     Log.d('Disconnect: requested, status=$_connectionStatus, server=${_selectedServer?.hostName}');
+    _switchDelayTimer?.cancel();
     _pendingSwitchServer = null;
     _isAutoConnecting = false;
     _connectionCompleter?.complete(false);
@@ -320,7 +323,8 @@ class VpnProvider extends ChangeNotifier {
           _stageName = 'Switching server...';
           Log.d('VPN: switching to ${server.hostName} after 2s delay');
           notifyListeners();
-          Future.delayed(const Duration(seconds: 2), () {
+          _switchDelayTimer?.cancel();
+          _switchDelayTimer = Timer(const Duration(seconds: 2), () {
             connectToServer(server);
           });
           return;
@@ -521,6 +525,7 @@ class VpnProvider extends ChangeNotifier {
     _disposed = true;
     _connectionTimer?.cancel();
     _refreshTimer?.cancel();
+    _switchDelayTimer?.cancel();
     super.dispose();
   }
 }
