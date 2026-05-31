@@ -28,6 +28,7 @@ class VpnProvider extends ChangeNotifier {
 
   Timer? _connectionTimer;
   Timer? _refreshTimer;
+  bool _disposed = false;
   Duration _connectionDuration = Duration.zero;
   DateTime? _connectedAt;
   int _reconnectCount = 0;
@@ -280,12 +281,13 @@ class VpnProvider extends ChangeNotifier {
   }
 
   void _onStatusChanged(VpnStatus? status) {
+    if (_disposed) return;
     _vpnStatus = status;
     notifyListeners();
   }
 
   void _onStageChanged(VPNStage? stage) {
-    if (stage == null) return;
+    if (_disposed || stage == null) return;
     Log.d('VPN Stage: $stage, server=${_selectedServer?.hostName}');
 
     switch (stage) {
@@ -516,6 +518,7 @@ class VpnProvider extends ChangeNotifier {
   @override
   void dispose() {
     Log.d('Provider: disposing');
+    _disposed = true;
     _connectionTimer?.cancel();
     _refreshTimer?.cancel();
     super.dispose();
