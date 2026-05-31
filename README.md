@@ -2,6 +2,8 @@
 
 A free, open-source VPN client for Android and iOS built with Flutter. Connects to [VPN Gate](https://www.vpngate.net/) public relay servers using OpenVPN.
 
+![FreeVPN Banner](assets/screenshots/freevpn-banner.webp)
+
 ## Features
 
 - Auto-connect to the best available server
@@ -12,6 +14,12 @@ A free, open-source VPN client for Android and iOS built with Flutter. Connects 
 - Background server list refresh every 5 minutes
 - Reconnect loop detection with automatic server failover
 - Offline server warnings
+
+## Screenshots
+
+| Intro | Splash | Connecting | Connected | Server List |
+|:---:|:---:|:---:|:---:|:---:|
+| ![Intro](assets/screenshots/1_intro.png) | ![Splash](assets/screenshots/2_splash.png) | ![Connecting](assets/screenshots/3_connecting.png) | ![Connected](assets/screenshots/4_connected.png) | ![Servers](assets/screenshots/5_server_list.png) |
 
 ## Requirements
 
@@ -37,4 +45,15 @@ OpenVPN configs from VPN Gate are sanitized at connect time to strip directives 
 - **Flutter** with Provider for state management
 - **openvpn_flutter** for VPN tunnel
 - **Dio** for API requests with retry logic
+- **Firebase Crashlytics & Analytics** for crash reporting and usage insights
 - **SharedPreferences** for connection state and favorites persistence
+
+## Privacy & Legal
+
+- [Privacy Policy](https://prasadrawas.github.io/free-vpn/privacy.html)
+- [Terms of Service](https://prasadrawas.github.io/free-vpn/terms.html)
+- [VPN Disclaimer](https://prasadrawas.github.io/free-vpn/disclaimer.html)
+
+## License
+
+This project is open source. Created by **Prasad Rawas**.
