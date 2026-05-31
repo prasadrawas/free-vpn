@@ -48,6 +48,18 @@ class VpnConnectionService {
       'pull-filter',
       'inactive',
       'auth-user-pass',
+      // Security: prevent file writes and code execution
+      'log ',
+      'log-append',
+      'plugin',
+      'iproute',
+      'route-up',
+      'route-pre-down',
+      'ipchange',
+      'client-connect',
+      'client-disconnect',
+      'learn-address',
+      'tls-verify',
     ];
 
     final lines = config.split('\n');
