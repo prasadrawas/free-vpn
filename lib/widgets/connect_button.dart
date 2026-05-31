@@ -19,6 +19,7 @@ class _ConnectButtonState extends State<ConnectButton>
   late AnimationController _pulseController;
   late AnimationController _scaleController;
   late Animation<double> _pulseAnimation;
+  ConnectionStatus? _previousStatus;
   late Animation<double> _scaleAnimation;
   bool _isPressed = false;
 
@@ -58,6 +59,8 @@ class _ConnectButtonState extends State<ConnectButton>
   }
 
   void _updateAnimations(ConnectionStatus status) {
+    if (status == _previousStatus) return;
+    _previousStatus = status;
     switch (status) {
       case ConnectionStatus.connecting:
         _rotationController.repeat();
