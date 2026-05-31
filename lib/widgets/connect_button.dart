@@ -309,5 +309,6 @@ class _GradientRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _GradientRingPainter oldDelegate) =>
+      oldDelegate.strokeWidth != strokeWidth || oldDelegate.colors != colors;
 }
