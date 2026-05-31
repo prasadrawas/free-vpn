@@ -300,6 +300,10 @@ class VpnProvider extends ChangeNotifier {
         _connectedAt = null;
         _clearConnectionState();
         _stopTimer();
+        // Signal auto-connect that this server failed
+        if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
+          _connectionCompleter!.complete(false);
+        }
         // If switching to a new server, wait for OpenVPN engine to reset
         if (_pendingSwitchServer != null) {
           final server = _pendingSwitchServer!;
