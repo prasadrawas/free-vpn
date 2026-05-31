@@ -12,17 +12,20 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  Log.d('App: launched, Firebase initialized');
 
-  // Crashlytics: catch all Flutter errors
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  try {
+    await Firebase.initializeApp();
+    Log.d('App: launched, Firebase initialized');
 
-  // Crashlytics: catch async errors not caught by Flutter
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  } catch (e) {
+    debugPrint('Firebase init failed: $e — running without crash reporting');
+  }
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
