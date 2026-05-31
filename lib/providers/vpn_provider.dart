@@ -96,7 +96,7 @@ class VpnProvider extends ChangeNotifier {
       // Only show error if fully disconnected and idle
       if (_connectionStatus == ConnectionStatus.disconnected &&
           _servers.isEmpty) {
-        _errorMessage = 'Failed to load servers. Pull to retry.';
+        _errorMessage = 'Failed to load servers. Tap to retry.';
       }
     } finally {
       _isLoadingServers = false;
