@@ -117,6 +117,9 @@ class VpnProvider extends ChangeNotifier {
     await prefs.setString('selected_server', jsonEncode(_selectedServer!.toJson()));
   }
 
+  static const _connectTimeout = Duration(seconds: 30);
+  static const _maxConnectRetries = 2;
+
   Future<void> connectToServer([VpnServer? server]) async {
     final target = server ?? _selectedServer;
     if (target == null) {
@@ -129,23 +132,60 @@ class VpnProvider extends ChangeNotifier {
       return;
     }
 
-    Log.d('Connect: starting connection to ${target.hostName} (${target.ip}), ${target.countryLong}, speed=${target.speedMbps}, ping=${target.pingDisplay}');
     _selectedServer = target;
-    _connectionStatus = ConnectionStatus.connecting;
-    _stageName = 'Preparing...';
     _errorMessage = null;
-    _reconnectCount = 0;
     _serverWentOffline = false;
-    notifyListeners();
 
-    try {
-      await _vpnConnectionService!.connect(target);
-    } catch (e) {
-      Log.error('Connect: failed to ${target.hostName}', e);
-      _connectionStatus = ConnectionStatus.error;
-      _errorMessage = 'Connection failed: $e';
+    for (var attempt = 1; attempt <= _maxConnectRetries; attempt++) {
+      Log.d('Connect: attempt $attempt/$_maxConnectRetries to ${target.hostName} (${target.ip}), ${target.countryLong}');
+      _connectionStatus = ConnectionStatus.connecting;
+      _stageName = attempt > 1
+          ? 'Retrying (${attempt}/$_maxConnectRetries)...'
+          : 'Preparing...';
+      _reconnectCount = 0;
       notifyListeners();
+
+      _connectionCompleter = Completer<bool>();
+
+      try {
+        await _vpnConnectionService!.connect(target);
+      } catch (e) {
+        Log.error('Connect: failed to ${target.hostName}', e);
+        _connectionCompleter = null;
+        if (attempt == _maxConnectRetries) {
+          _connectionStatus = ConnectionStatus.error;
+          _errorMessage = 'Connection failed: $e';
+          notifyListeners();
+          return;
+        }
+        await Future.delayed(const Duration(seconds: 1));
+        continue;
+      }
+
+      final connected = await _connectionCompleter!.future
+          .timeout(_connectTimeout, onTimeout: () => false);
+      _connectionCompleter = null;
+
+      if (connected) {
+        Log.d('Connect: SUCCESS on attempt $attempt');
+        return;
+      }
+
+      Log.d('Connect: attempt $attempt timed out');
+      _vpnConnectionService?.disconnect();
+
+      if (attempt < _maxConnectRetries) {
+        _stageName = 'Retrying...';
+        notifyListeners();
+        await Future.delayed(const Duration(seconds: 1));
+      }
     }
+
+    // All retries failed
+    Log.d('Connect: all $_maxConnectRetries attempts failed for ${target.hostName}');
+    _connectionStatus = ConnectionStatus.error;
+    _errorMessage = 'Connection timed out. Try a different server.';
+    notifyListeners();
   }
 
   /// Try servers one by one until one connects successfully.
