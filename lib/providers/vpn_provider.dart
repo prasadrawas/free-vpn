@@ -482,6 +482,10 @@ class VpnProvider extends ChangeNotifier {
   void _startBackgroundRefresh() {
     _refreshTimer?.cancel();
     _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
+      if (_isAutoConnecting) {
+        Log.d('Refresh: skipped, auto-connect in progress');
+        return;
+      }
       Log.d('Refresh: background server list refresh starting');
       try {
         final freshServers = await _vpnGateService.fetchServers();
