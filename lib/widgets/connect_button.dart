@@ -115,16 +115,16 @@ class _ConnectButtonState extends State<ConnectButton>
         return GestureDetector(
           onTapDown: (_) {
             _scaleController.reverse();
-            setState(() => _isPressed = true);
+            if (mounted) setState(() => _isPressed = true);
           },
           onTapUp: (_) {
             _scaleController.forward();
-            setState(() => _isPressed = false);
+            if (mounted) setState(() => _isPressed = false);
             _onTap(provider);
           },
           onTapCancel: () {
             _scaleController.forward();
-            setState(() => _isPressed = false);
+            if (mounted) setState(() => _isPressed = false);
           },
           child: AnimatedBuilder(
             animation: Listenable.merge(
