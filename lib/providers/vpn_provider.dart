@@ -15,7 +15,7 @@ enum ConnectionStatus { disconnected, connecting, connected, disconnecting, erro
 
 class VpnProvider extends ChangeNotifier {
   final VpnGateService _vpnGateService = VpnGateService();
-  late VpnConnectionService _vpnConnectionService;
+  VpnConnectionService? _vpnConnectionService;
 
   List<VpnServer> _servers = [];
   VpnServer? _selectedServer;
@@ -64,11 +64,12 @@ class VpnProvider extends ChangeNotifier {
 
   Future<void> initialize() async {
     Log.d('Provider: initializing');
-    _vpnConnectionService = VpnConnectionService(
+    final service = VpnConnectionService(
       onStatusChanged: _onStatusChanged,
       onStageChanged: _onStageChanged,
     );
-    _vpnConnectionService.initialize();
+    service.initialize();
+    _vpnConnectionService = service;
 
     await _loadFavorites();
     await _restoreConnectionState();
@@ -121,6 +122,11 @@ class VpnProvider extends ChangeNotifier {
       return;
     }
 
+    if (_vpnConnectionService == null) {
+      Log.d('Connect: service not initialized yet');
+      return;
+    }
+
     Log.d('Connect: starting connection to ${target.hostName} (${target.ip}), ${target.countryLong}, speed=${target.speedMbps}, ping=${target.pingDisplay}');
     _selectedServer = target;
     _connectionStatus = ConnectionStatus.connecting;
@@ -131,7 +137,7 @@ class VpnProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _vpnConnectionService.connect(target);
+      await _vpnConnectionService!.connect(target);
     } catch (e) {
       Log.error('Connect: failed to ${target.hostName}', e);
       _connectionStatus = ConnectionStatus.error;
@@ -193,7 +199,7 @@ class VpnProvider extends ChangeNotifier {
       _connectionCompleter = Completer<bool>();
 
       try {
-        await _vpnConnectionService.connect(server);
+        await _vpnConnectionService!.connect(server);
       } catch (e) {
         Log.error('AutoConnect: ${server.hostName} threw error', e);
         continue;
@@ -212,7 +218,7 @@ class VpnProvider extends ChangeNotifier {
 
       // Failed — disconnect before trying next
       Log.d('AutoConnect: FAILED ${server.hostName}, moving to next');
-      _vpnConnectionService.disconnect();
+      _vpnConnectionService?.disconnect();
       // Brief pause between attempts
       await Future.delayed(const Duration(milliseconds: 500));
     }
@@ -240,7 +246,7 @@ class VpnProvider extends ChangeNotifier {
       _stageName = 'Switching server...';
       _stopTimer();
       notifyListeners();
-      _vpnConnectionService.disconnect();
+      _vpnConnectionService?.disconnect();
     } else {
       // Not connected, connect directly
       _pendingSwitchServer = null;
@@ -258,7 +264,7 @@ class VpnProvider extends ChangeNotifier {
     _stageName = 'Disconnecting...';
     _errorMessage = null;
     notifyListeners();
-    _vpnConnectionService.disconnect();
+    _vpnConnectionService?.disconnect();
   }
 
   void toggleFavorite(VpnServer server) {
@@ -389,7 +395,7 @@ class VpnProvider extends ChangeNotifier {
           _connectedAt = null;
           _clearConnectionState();
           _stopTimer();
-          _vpnConnectionService.disconnect();
+          _vpnConnectionService?.disconnect();
           if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
             // Auto-connect mode: signal failure, let it try next server
             _connectionCompleter!.complete(false);
