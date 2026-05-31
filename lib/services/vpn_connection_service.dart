@@ -80,8 +80,13 @@ class VpnConnectionService {
 
   Future<void> connect(VpnServer server) async {
     Log.d('OpenVPN Connect: ${server.hostName} (${server.ip}), ${server.countryLong}, configSize=${server.openVpnConfigBase64.length}');
-    final configBytes = base64.decode(server.openVpnConfigBase64);
-    final rawConfig = utf8.decode(configBytes);
+    final String rawConfig;
+    try {
+      final configBytes = base64.decode(server.openVpnConfigBase64);
+      rawConfig = utf8.decode(configBytes);
+    } catch (e) {
+      throw Exception('Invalid server configuration. Try a different server.');
+    }
     final config = _sanitizeConfig(rawConfig);
     Log.d('OpenVPN Config: sanitized, ${config.split('\n').length} lines');
     _openVPN.connect(
