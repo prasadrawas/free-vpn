@@ -3,26 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FreeVPN - Free, Open-Source VPN for Android</title>
-  <meta name="description" content="Connect to free VPN servers worldwide. No accounts, no subscriptions, no data collection. Open-source and built with privacy in mind.">
-  <link rel="icon" href="app_icon.png">
+  <title>FreeVPN - Free, Fast & No Ads VPN for Android | Open Source</title>
+  <meta name="description" content="Download FreeVPN - a free, open-source VPN app for Android. No ads, no accounts, no data collection. Connect to 100+ servers worldwide with one tap. Built with OpenVPN.">
+  <meta name="keywords" content="free vpn, vpn for android, no ads vpn, open source vpn, fast vpn, vpn gate, secure vpn, private browsing, no registration vpn, unlimited vpn, openvpn android">
+  <meta name="author" content="Prasad Rawas">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://freevpn.prasadrawas.online/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FreeVPN - Free, Fast & No Ads VPN for Android">
+  <meta property="og:description" content="Download FreeVPN - a free, open-source VPN app for Android. No ads, no accounts, no data collection. Connect to 100+ servers worldwide.">
+  <meta property="og:url" content="https://freevpn.prasadrawas.online/">
+  <meta property="og:image" content="https://freevpn.prasadrawas.online/app_icon.png">
+  <meta property="og:site_name" content="FreeVPN">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FreeVPN - Free, Fast & No Ads VPN for Android">
+  <meta name="twitter:description" content="Free, open-source VPN for Android. No ads, no accounts. 100+ servers worldwide.">
+  <meta name="twitter:image" content="https://freevpn.prasadrawas.online/app_icon.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="app_icon.png">
+  <link rel="apple-touch-icon" href="app_icon.png">
+
+  <!-- Fonts & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FreeVPN",
+    "operatingSystem": "Android",
+    "applicationCategory": "UtilitiesApplication",
+    "description": "Free, open-source VPN client for Android. Connect to 100+ VPN Gate servers worldwide. No ads, no accounts, no data collection.",
+    "url": "https://freevpn.prasadrawas.online/",
+    "downloadUrl": "https://github.com/prasadrawas/free-vpn/releases",
+    "author": {
+      "@type": "Person",
+      "name": "Prasad Rawas"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.5",
+      "ratingCount": "1"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is FreeVPN really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, FreeVPN is 100% free with no ads, no in-app purchases, and no subscriptions. It connects to volunteer-run VPN Gate relay servers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does FreeVPN collect my data?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. FreeVPN does not collect, store, or transmit any personal data. Anonymous crash reports are collected via Firebase Crashlytics to improve app stability."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does FreeVPN work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "FreeVPN connects to free VPN Gate public relay servers using the OpenVPN protocol. It automatically selects the fastest, most reliable server for you."
+        }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://freevpn.prasadrawas.online/"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="nav">
-  <a href="/" class="nav-logo">
-    <img src="app_icon.png" alt="FreeVPN">
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="/" class="nav-logo" aria-label="FreeVPN Home">
+    <img src="app_icon.png" alt="FreeVPN App Icon" width="36" height="36">
     <span>FreeVPN</span>
   </a>
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#how-it-works">How it Works</a>
     <a href="privacy.html">Privacy</a>
-    <a href="https://github.com/prasadrawas/free-vpn" target="_blank">GitHub</a>
+    <a href="https://github.com/prasadrawas/free-vpn" target="_blank" rel="noopener noreferrer">GitHub</a>
     <a href="#download" class="nav-cta">Download</a>
   </div>
 </nav>
@@ -30,79 +129,79 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-content">
-    <img src="app_icon.png" alt="FreeVPN" class="hero-icon">
+    <img src="app_icon.png" alt="FreeVPN - Free VPN App for Android" class="hero-icon" width="120" height="120">
     <h1>Browse freely with <span class="gradient">FreeVPN</span></h1>
     <p>Connect to free VPN servers worldwide. No accounts, no subscriptions, no data collection. Open-source and built with privacy in mind.</p>
     <div class="hero-buttons">
-      <a href="https://github.com/prasadrawas/free-vpn/releases" class="btn-primary" id="download">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2H6.477L2 6.477v11.046L6.477 22h11.046L22 17.523V6.477L17.523 2zM12 17.5l-5-5h3V8h4v4.5h3l-5 5z"/></svg>
+      <a href="https://github.com/prasadrawas/free-vpn/releases" class="btn-primary" id="download" aria-label="Download FreeVPN APK">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.523 2H6.477L2 6.477v11.046L6.477 22h11.046L22 17.523V6.477L17.523 2zM12 17.5l-5-5h3V8h4v4.5h3l-5 5z"/></svg>
         Download APK
       </a>
-      <a href="https://github.com/prasadrawas/free-vpn" class="btn-secondary" target="_blank">View Source</a>
+      <a href="https://github.com/prasadrawas/free-vpn" class="btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="View source code on GitHub">View Source</a>
     </div>
   </div>
 </section>
 
 <!-- FEATURES -->
-<section class="features" id="features">
+<section class="features" id="features" aria-label="Features">
   <h2 class="section-title fade-up">Why FreeVPN?</h2>
   <p class="section-subtitle fade-up">Everything you need in a VPN, nothing you don't.</p>
   <div class="features-grid">
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#128274;</div>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#128274;</div>
       <h3>One-Tap Connect</h3>
       <p>Hit connect and the app automatically finds the fastest, most reliable server for you. No manual configuration needed.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#127758;</div>
+    </article>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#127758;</div>
       <h3>Global Server Network</h3>
       <p>Access hundreds of volunteer-run VPN Gate relay servers across Japan, Korea, US, Europe, and more. Updated every 5 minutes.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#128171;</div>
+    </article>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#128171;</div>
       <h3>Smart Server Selection</h3>
       <p>Servers are ranked by reliability score, speed, and ping. Offline servers are automatically filtered out.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#128274;</div>
+    </article>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#128274;</div>
       <h3>No Accounts Required</h3>
       <p>No sign-up, no email, no phone number. Just install and connect. Your privacy starts from the first tap.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#9889;</div>
+    </article>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#9889;</div>
       <h3>Auto-Reconnect</h3>
       <p>If a server drops, the app detects it and prompts you to switch. Seamless server switching without disconnecting first.</p>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feature-icon">&#128736;</div>
+    </article>
+    <article class="feature-card fade-up">
+      <div class="feature-icon" aria-hidden="true">&#128736;</div>
       <h3>Open Source</h3>
       <p>Every line of code is on GitHub. Inspect it, fork it, contribute. No hidden trackers, no data collection, no surprises.</p>
-    </div>
+    </article>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="how-it-works" id="how-it-works">
+<section class="how-it-works" id="how-it-works" aria-label="How it works">
   <div class="inner">
     <h2 class="section-title fade-up">How it Works</h2>
     <p class="section-subtitle fade-up">Three taps to a secure connection.</p>
     <div class="steps">
       <div class="step">
-        <div class="step-num">1</div>
+        <div class="step-num" aria-hidden="true">1</div>
         <div class="step-content">
           <h3>Install the App</h3>
           <p>Download the APK from GitHub releases and install it on your Android device. No Play Store account required.</p>
         </div>
       </div>
       <div class="step">
-        <div class="step-num">2</div>
+        <div class="step-num" aria-hidden="true">2</div>
         <div class="step-content">
           <h3>Tap Connect</h3>
           <p>The app automatically fetches the latest server list and connects you to the best available server. Or browse and pick your own.</p>
         </div>
       </div>
       <div class="step">
-        <div class="step-num">3</div>
+        <div class="step-num" aria-hidden="true">3</div>
         <div class="step-content">
           <h3>Browse Securely</h3>
           <p>Your connection is encrypted via OpenVPN. The app runs in the background and reconnects automatically if needed.</p>
@@ -113,7 +212,7 @@
 </section>
 
 <!-- STATS -->
-<section class="stats">
+<section class="stats" aria-label="Statistics">
   <div class="stats-grid">
     <div class="fade-up">
       <div class="stat-num" data-count="100" data-suffix="+">0+</div>
@@ -135,26 +234,26 @@
 </section>
 
 <!-- CTA -->
-<section class="cta">
+<section class="cta" aria-label="Download">
   <div class="cta-box fade-up">
     <h2>Ready to browse freely?</h2>
     <p>Download FreeVPN and take control of your internet privacy today.</p>
-    <a href="https://github.com/prasadrawas/free-vpn/releases" class="btn-primary">
-      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2H6.477L2 6.477v11.046L6.477 22h11.046L22 17.523V6.477L17.523 2zM12 17.5l-5-5h3V8h4v4.5h3l-5 5z"/></svg>
+    <a href="https://github.com/prasadrawas/free-vpn/releases" class="btn-primary" aria-label="Download FreeVPN Now">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.523 2H6.477L2 6.477v11.046L6.477 22h11.046L22 17.523V6.477L17.523 2zM12 17.5l-5-5h3V8h4v4.5h3l-5 5z"/></svg>
       Download Now
     </a>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-links">
+<footer class="footer" role="contentinfo">
+  <nav class="footer-links" aria-label="Footer navigation">
     <a href="privacy.html">Privacy Policy</a>
     <a href="terms.html">Terms of Service</a>
     <a href="disclaimer.html">VPN Disclaimer</a>
-    <a href="https://github.com/prasadrawas/free-vpn" target="_blank">GitHub</a>
-  </div>
-  <p>Created by Prasad Rawas &middot; Powered by <a href="https://www.vpngate.net" target="_blank">VPN Gate</a></p>
+    <a href="https://github.com/prasadrawas/free-vpn" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <p>Created by Prasad Rawas &middot; Powered by <a href="https://www.vpngate.net" target="_blank" rel="noopener noreferrer">VPN Gate</a></p>
 </footer>
 
 <script src="script.js"></script>

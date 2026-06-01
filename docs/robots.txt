@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://freevpn.prasadrawas.online/sitemap.xml
