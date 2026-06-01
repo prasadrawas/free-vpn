@@ -50,9 +50,9 @@ OpenVPN configs from VPN Gate are sanitized at connect time to strip directives 
 
 ## Privacy & Legal
 
-- [Privacy Policy](https://prasadrawas.github.io/free-vpn/privacy.html)
-- [Terms of Service](https://prasadrawas.github.io/free-vpn/terms.html)
-- [VPN Disclaimer](https://prasadrawas.github.io/free-vpn/disclaimer.html)
+- [Privacy Policy](https://freevpn.prasadrawas.online/privacy.html)
+- [Terms of Service](https://freevpn.prasadrawas.online/terms.html)
+- [VPN Disclaimer](https://freevpn.prasadrawas.online/disclaimer.html)
 
 ## License
 
