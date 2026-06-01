@@ -7,19 +7,19 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://freevpn.prasadrawas.online/privacy.html</loc>
+    <loc>https://freevpn.prasadrawas.online/legal/privacy.html</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://freevpn.prasadrawas.online/terms.html</loc>
+    <loc>https://freevpn.prasadrawas.online/legal/terms.html</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://freevpn.prasadrawas.online/disclaimer.html</loc>
+    <loc>https://freevpn.prasadrawas.online/legal/disclaimer.html</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
