@@ -57,3 +57,5 @@ android/app/google-services.json
 .fvm/
 .fvmrc
 .metadata
+email-list.csv
+portfolio-projects.md
