@@ -1,19 +1,31 @@
 # FreeVPN
 
-A free, open-source VPN client for Android and iOS built with Flutter. Connects to [VPN Gate](https://www.vpngate.net/) public relay servers using OpenVPN.
+A free, open-source VPN client for Android built with Flutter. Connects to [VPN Gate](https://www.vpngate.net/) public relay servers using OpenVPN.
 
 ![FreeVPN Banner](assets/screenshots/freevpn-banner.webp)
 
 ## Features
 
-- Auto-connect to the best available server
+- One-tap auto-connect to the best available server
+- Real-time download/upload speed display
+- Connection quality indicator (Good/Fair/Poor)
+- Country filter on server list
+- Recently connected servers (last 5)
+- Signal strength bars for server speed
 - Server list sorted by reliability score, speed, and ping
-- Server switching without manual disconnect
+- Seamless server switching without manual disconnect
 - Favorite servers
-- Connection timer with state persistence across app restarts
+- Data usage tracking (daily/weekly/monthly)
+- Connection timer with state persistence across app kills
 - Background server list refresh every 5 minutes
 - Reconnect loop detection with automatic server failover
 - Offline server warnings
+- Battery optimization prompt for Xiaomi/Huawei/Oppo/Vivo
+- ISP DNS bypass for blocked networks (Jio, Vi, Airtel)
+- Persistent VPN notification with server name and stop button
+- Privacy policy, terms of service, VPN disclaimer (WebView)
+- Firebase Crashlytics and Analytics
+- 115+ unit tests
 
 ## Screenshots
 
@@ -38,15 +50,17 @@ flutter run
 
 The app fetches free VPN servers from the [VPN Gate API](https://www.vpngate.net/api/iphone/), filters out unreliable ones (low speed, no sessions, no ping), and connects using the `openvpn_flutter` plugin.
 
-OpenVPN configs from VPN Gate are sanitized at connect time to strip directives incompatible with the mobile OpenVPN library, and cipher negotiation directives are injected for compatibility.
+OpenVPN configs from VPN Gate are sanitized at connect time — stripping 21 dangerous/incompatible directives and injecting cipher negotiation for compatibility with the bundled OpenVPN library. ISP DNS blocking is bypassed via direct IP fallback with SSL certificate validation.
 
 ## Tech Stack
 
 - **Flutter** with Provider for state management
 - **openvpn_flutter** for VPN tunnel
-- **Dio** for API requests with retry logic
+- **Dio** for API requests with retry and ISP bypass
 - **Firebase Crashlytics & Analytics** for crash reporting and usage insights
-- **SharedPreferences** for connection state and favorites persistence
+- **SharedPreferences** for connection state, favorites, recent servers, and data usage
+- **WebView** for legal pages (loaded from website)
+- **package_info_plus** for dynamic version display
 
 ## Deployment
 
@@ -125,7 +139,7 @@ docs/
 ### Running Tests
 
 ```bash
-flutter test              # Run all 115 tests
+flutter test              # Run all tests
 flutter test test/models/ # Run model tests only
 flutter test test/services/ # Run service tests only
 flutter test test/providers/ # Run provider tests only

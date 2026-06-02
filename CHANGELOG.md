@@ -1,68 +1,89 @@
 # Changelog
 
-## 2026-05-31
+## 1.0.3+5 (2026-06-02)
 
-### Build & Configuration Fixes
-- Removed `android:extractNativeLibs="true"` from AndroidManifest.xml and moved to `jniLibs.useLegacyPackaging = true` in build.gradle.kts to fix Gradle `packageDebug` build failure
-- Renamed Android SDK `cmdline-tools/latest-3` to `latest` to fix inconsistent location warning
-- Cleaned up stale `cmdline-tools/latest-2` and `latest-backup` directories
-- Added `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_SPECIAL_USE` permissions to AndroidManifest.xml
+### New Features
+- Real-time download/upload speed display on home screen (KB/s, MB/s)
+- Connection quality indicator badge (Good/Fair/Poor) based on ping and speed
+- Country filter chips on server list for quick filtering
+- Recently connected servers section (last 5) on server list
+- Signal strength bars replacing linear speed indicator on server cards
+- Data usage tracking with daily/weekly/monthly breakdown in Settings
+- VPN notification shows server country name ("FreeVPN - Japan")
+- Notification permission request for Android 13+
 
-### VPN Connection Fixes
-- Added OpenVPN config sanitization — strips problematic directives (`register-dns`, `block-outside-dns`, `auth-user-pass`, etc.) that caused connection failures with the `openvpn_flutter` plugin
-- Added `data-ciphers` and `data-ciphers-fallback` directives to enable cipher negotiation between the 2020-era OpenVPN library and modern VPN Gate servers
-- Fixed reconnect loop (`wait_connection → authenticating → get_config → reconnect`) by enabling proper cipher fallback to AES-128-CBC
+### Improvements
+- Speed displayed in Mbps next to signal bars with color coding
+- Legal pages (Privacy, Terms, Disclaimer) loaded via WebView from website
+- Dynamic version display in About screen using package_info_plus
 
-### Server List Improvements
-- Filtered out unusable servers: no ping response, zero sessions, speed < 0.5 Mbps, zero score
-- Sorted servers by VPN Gate score (reliability) first, then speed, then ping
-- Added background server list auto-refresh every 5 minutes
-- Added online indicator (green/grey dot) on server cards
-- Switched from `http` to `dio` package for network requests
-- Added 3 retries with increasing delay (2s, 4s, 6s) for server list fetching
-- Set 10s connect timeout and 30s receive timeout for API calls
-- Removed `http` package dependency
+## 1.0.2+3 (2026-06-01)
+
+### Bug Fixes
+- Fixed logger crash when Firebase not initialized in release builds
+- Fixed release signing — key.properties path corrected in build.gradle.kts
+
+## 1.0.1+2 (2026-06-01)
+
+### Bug Fixes
+- Fixed Firebase Crashlytics crash on app launch in release mode
+- Logger now checks Firebase availability before accessing Crashlytics
+
+## 1.0.0+1 (2026-05-31)
+
+### Build & Configuration
+- Removed `android:extractNativeLibs="true"` and used `jniLibs.useLegacyPackaging` instead
+- Added `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_SPECIAL_USE` permissions
+- Changed application ID from `com.example.free_vpns` to `com.prasadrawas.freevpn`
+- Configured release signing with keystore, ProGuard rules, R8 minification
+- Adaptive launcher icons with dark navy background
+- Native Android launch screen matching app theme
+- Integrated Firebase Crashlytics and Analytics
+
+### VPN Connection
+- OpenVPN config sanitization — strips 21 dangerous/incompatible directives
+- Cipher negotiation via `data-ciphers` and `data-ciphers-fallback` directives
+- ISP DNS bypass using direct IP fallback with SSL certificate validation
+- Reconnect loop detection (4 retries = server offline)
+- 30s connection timeout with 2 automatic retries
+- Cancellable 2s server switch delay
 
 ### Auto-Connect
-- Added auto-connect feature: tapping Connect with no server selected tries servers one by one until one works (15s timeout per server)
-- Connect button retries server fetch if list is empty — shows "Fetching servers..." instead of immediate error
-- Tapping Connect after a failed fetch retries the fetch and auto-connects
+- One-tap auto-connect tries servers one by one (15s timeout each)
+- Fetches servers if list empty, retries on failure
+- Shows progress: "Trying Japan (1/50)..."
+
+### Server List
+- Filtered by ping, sessions, speed, and score thresholds
+- Sorted by VPN Gate reliability score, then speed, then ping
+- Online indicator (green/grey dot) on server cards
+- Search by country, hostname
+- Favorite servers with persistence
 
 ### Server Switching
-- Tapping any server in the list auto-connects (disconnects current if needed)
-- Added `switchServer` method with `_pendingSwitchServer` to properly sequence disconnect → 2s delay → connect, avoiding race conditions where the OpenVPN engine wasn't ready
-- UI shows "Switching server..." during the transition
-
-### Reconnect Loop Detection
-- Detects reconnect loops (4 consecutive reconnect attempts) and stops the connection
-- In manual mode: shows "Server appears to be offline. Try a different server." error
-- In auto-connect mode: silently skips to the next server
-- Removed false-positive offline detection based on API list (server can be working but not in current API response)
+- Auto-connect on server tap from list
+- Proper disconnect → 2s delay → connect sequence
+- "Switching server..." status during transition
 
 ### State Persistence
-- Added JSON serialization (`toJson`/`fromJson`) to `VpnServer` model
-- Saved connected server and connection start time to SharedPreferences
-- On relaunch: restores connection status, selected server, and timer (continues from actual elapsed time)
-- Cleared saved state on disconnect
-- Only restores selected server if there was an active connection (no stale server on fresh launch)
+- Connection state (server + timestamp) survives app kills
+- Timer resumes from actual elapsed time on relaunch
+- Favorites persisted across sessions
 
-### Disconnect UX
-- Connect button toggles to disconnect when connected
-- On press-down while connected: button turns red with "DISCONNECT" label and power icon
-- On release: returns to green "CONNECTED" state (or disconnects if tap completes)
-- Added "Tap to disconnect" hint text below button when connected
-- Disconnect clears all error messages
+### UX
+- Animated connect button with rotating ring (connecting), pulse glow (connected), red disconnect on press
+- "Tap to disconnect" hint when connected
+- Splash screen with creator credits (1.5s)
+- Settings with About, Privacy Policy, Terms, Disclaimer
+- Battery optimization prompt for aggressive OEM ROMs
+- Offline server snackbar with quick switch action
+- Error messages suppressed during active sessions
+- Server fetch errors only shown when disconnected and no cached servers
 
-### Error Handling
-- Server fetch errors suppressed while VPN is connected (don't disrupt active sessions)
-- Server fetch errors only shown when fully disconnected and no cached servers
-- Disconnect clears any stale error messages
-- Error message updated to "Tap to retry" instead of "Pull to refresh"
-
-### Logging
-- Removed file-based `LogService` and `path_provider` dependency
-- Replaced all logging with `debugPrint` (console only in debug mode)
-
-### Offline Server Warning
-- Added floating snackbar with "SWITCH" button when server goes offline
-- Offline warning only triggers from actual VPN reconnect failures, not API list changes
+### Infrastructure
+- Unified logger: debugPrint in debug, Crashlytics breadcrumbs in release
+- Background server refresh every 5 minutes (skipped during auto-connect)
+- Callbacks guarded against disposed provider
+- 115+ unit tests covering models, services, provider, and widgets
+- Landing page website on GitHub Pages with SEO
+- Custom domain: freevpn.prasadrawas.online
