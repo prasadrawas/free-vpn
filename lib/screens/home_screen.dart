@@ -132,15 +132,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Connect button
                       const ConnectButton(),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // Timer
                       const ConnectionTimer(),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
                       // Status
-                      const StatusDisplay(),
+                      const Flexible(child: StatusDisplay()),
 
                       const Spacer(flex: 3),
 
