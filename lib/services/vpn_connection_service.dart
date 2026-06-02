@@ -103,7 +103,7 @@ class VpnConnectionService {
     Log.d('OpenVPN Config: sanitized, ${config.split('\n').length} lines');
     _openVPN.connect(
       config,
-      server.hostName,
+      'FreeVPN - ${server.countryLong}',
       certIsRequired: true,
     );
   }
