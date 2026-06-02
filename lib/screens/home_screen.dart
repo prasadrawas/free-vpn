@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
 
-                      const Spacer(flex: 2),
+                      const Spacer(),
 
                       // Connect button
                       const ConnectButton(),
@@ -140,9 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
 
                       // Status
-                      const Flexible(child: StatusDisplay()),
+                      const Flexible(flex: 3, child: StatusDisplay()),
 
-                      const Spacer(flex: 3),
+                      const Spacer(),
 
                       // Server selector
                       _ServerSelector(provider: provider),
