@@ -224,6 +224,10 @@ class VpnProvider extends ChangeNotifier {
 
   /// Try servers one by one until one connects successfully.
   Future<void> autoConnect() async {
+    if (_vpnConnectionService == null) {
+      Log.d('AutoConnect: service not initialized yet');
+      return;
+    }
     Log.d('AutoConnect: started, servers=${_servers.length}, loading=$_isLoadingServers');
 
     // If no servers, fetch them first
