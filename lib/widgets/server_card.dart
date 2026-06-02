@@ -100,33 +100,22 @@ class ServerCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
-                      // Speed bar
+                      const SizedBox(height: 6),
+                      // Speed with signal bars
                       Row(
                         children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(3),
-                              child: LinearProgressIndicator(
-                                value: maxSpeed > 0
-                                    ? (server.speed / maxSpeed).clamp(0.0, 1.0)
-                                    : 0,
-                                minHeight: 4,
-                                backgroundColor:
-                                    AppTheme.primaryDark.withValues(alpha: 0.5),
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  _speedColor(server.speed / maxSpeed),
-                                ),
-                              ),
-                            ),
+                          _SignalBars(
+                            strength: maxSpeed > 0
+                                ? (server.speed / maxSpeed).clamp(0.0, 1.0)
+                                : 0,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             server.speedMbps,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppTheme.textSecondary,
-                              fontWeight: FontWeight.w500,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _speedColor(maxSpeed > 0 ? server.speed / maxSpeed : 0),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -211,5 +200,41 @@ class ServerCard extends StatelessWidget {
     if (ratio > 0.7) return AppTheme.accentGreen;
     if (ratio > 0.3) return AppTheme.accentCyan;
     return AppTheme.accentOrange;
+  }
+}
+
+class _SignalBars extends StatelessWidget {
+  final double strength; // 0.0 to 1.0
+
+  const _SignalBars({required this.strength});
+
+  @override
+  Widget build(BuildContext context) {
+    final activeBars = strength > 0.75 ? 4 : strength > 0.5 ? 3 : strength > 0.25 ? 2 : strength > 0 ? 1 : 0;
+    final color = strength > 0.7
+        ? AppTheme.accentGreen
+        : strength > 0.3
+            ? AppTheme.accentCyan
+            : AppTheme.accentOrange;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: List.generate(4, (i) {
+        final height = 6.0 + (i * 4);
+        final isActive = i < activeBars;
+        return Padding(
+          padding: const EdgeInsets.only(right: 2),
+          child: Container(
+            width: 4,
+            height: height,
+            decoration: BoxDecoration(
+              color: isActive ? color : AppTheme.dividerColor,
+              borderRadius: BorderRadius.circular(1.5),
+            ),
+          ),
+        );
+      }),
+    );
   }
 }
