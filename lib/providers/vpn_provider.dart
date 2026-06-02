@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 import '../services/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vpn_server.dart';
+import '../services/data_usage_service.dart';
 import '../services/vpn_connection_service.dart';
 import '../services/vpngate_service.dart';
 
 enum ConnectionStatus { disconnected, connecting, connected, disconnecting, error }
+enum ConnectionQuality { good, fair, poor, unknown }
 
 class VpnProvider extends ChangeNotifier {
   final VpnGateService _vpnGateService = VpnGateService();
@@ -39,6 +41,21 @@ class VpnProvider extends ChangeNotifier {
   VpnServer? _pendingSwitchServer;
   Timer? _switchDelayTimer;
 
+  // Speed tracking
+  int _sessionByteIn = 0;
+  int _sessionByteOut = 0;
+  int _prevByteIn = 0;
+  int _prevByteOut = 0;
+  DateTime? _prevSampleTime;
+  double _downloadSpeed = 0;
+  double _uploadSpeed = 0;
+
+  // Recent servers
+  List<VpnServer> _recentServers = [];
+
+  // Connection quality
+  ConnectionQuality _connectionQuality = ConnectionQuality.unknown;
+
   // Getters
   List<VpnServer> get servers => _servers;
   VpnServer? get selectedServer => _selectedServer;
@@ -49,6 +66,10 @@ class VpnProvider extends ChangeNotifier {
   bool get isLoadingServers => _isLoadingServers;
   Duration get connectionDuration => connectionDurationNotifier.value;
   Set<String> get favoriteIps => _favoriteIps;
+  double get downloadSpeed => _downloadSpeed;
+  double get uploadSpeed => _uploadSpeed;
+  List<VpnServer> get recentServers => _recentServers;
+  ConnectionQuality get connectionQuality => _connectionQuality;
 
   bool get serverWentOffline => _serverWentOffline;
   bool get isAutoConnecting => _isAutoConnecting;
@@ -74,7 +95,9 @@ class VpnProvider extends ChangeNotifier {
     _vpnConnectionService = service;
 
     await _loadFavorites();
+    await _loadRecentServers();
     await _restoreConnectionState();
+    _requestNotificationPermission();
     // Load servers in background — don't block init or show errors during active sessions
     loadServers();
     _startBackgroundRefresh();
@@ -120,6 +143,16 @@ class VpnProvider extends ChangeNotifier {
   static const _connectTimeout = Duration(seconds: 30);
   static const _maxConnectRetries = 2;
 
+  static const _channel = MethodChannel('com.prasadrawas.freevpn/battery');
+
+  Future<void> _requestNotificationPermission() async {
+    try {
+      await _channel.invokeMethod('requestNotificationPermission');
+    } on PlatformException {
+      // Ignore — pre-Android 13 doesn't need this
+    }
+  }
+
   Future<void> connectToServer([VpnServer? server]) async {
     final target = server ?? _selectedServer;
     if (target == null) {
@@ -132,6 +165,7 @@ class VpnProvider extends ChangeNotifier {
       return;
     }
 
+    await _requestNotificationPermission();
     _selectedServer = target;
     _errorMessage = null;
     _serverWentOffline = false;
@@ -326,7 +360,59 @@ class VpnProvider extends ChangeNotifier {
   void _onStatusChanged(VpnStatus? status) {
     if (_disposed) return;
     _vpnStatus = status;
+
+    // Calculate real-time speed
+    if (status != null && _connectionStatus == ConnectionStatus.connected) {
+      final now = DateTime.now();
+      final byteIn = int.tryParse(status.byteIn ?? '0') ?? 0;
+      final byteOut = int.tryParse(status.byteOut ?? '0') ?? 0;
+
+      if (_prevSampleTime != null) {
+        final elapsed = now.difference(_prevSampleTime!).inMilliseconds;
+        if (elapsed > 0) {
+          _downloadSpeed = (byteIn - _prevByteIn) / elapsed * 1000;
+          _uploadSpeed = (byteOut - _prevByteOut) / elapsed * 1000;
+          if (_downloadSpeed < 0) _downloadSpeed = 0;
+          if (_uploadSpeed < 0) _uploadSpeed = 0;
+          _updateConnectionQuality();
+        }
+      }
+      _prevByteIn = byteIn;
+      _prevByteOut = byteOut;
+      _sessionByteIn = byteIn;
+      _sessionByteOut = byteOut;
+      _prevSampleTime = now;
+    }
+
     notifyListeners();
+  }
+
+  void _resetSpeedTracking() {
+    // Save session usage before resetting
+    if (_sessionByteIn > 0 || _sessionByteOut > 0) {
+      DataUsageService.addUsage(_sessionByteIn, _sessionByteOut);
+    }
+    _sessionByteIn = 0;
+    _sessionByteOut = 0;
+    _prevByteIn = 0;
+    _prevByteOut = 0;
+    _prevSampleTime = null;
+    _downloadSpeed = 0;
+    _uploadSpeed = 0;
+    _connectionQuality = ConnectionQuality.unknown;
+  }
+
+  void _updateConnectionQuality() {
+    final ping = _selectedServer?.ping ?? 999;
+    final speedKBs = _downloadSpeed / 1024;
+
+    if (ping < 80 && speedKBs > 500) {
+      _connectionQuality = ConnectionQuality.good;
+    } else if (ping < 150 || speedKBs > 100) {
+      _connectionQuality = ConnectionQuality.fair;
+    } else {
+      _connectionQuality = ConnectionQuality.poor;
+    }
   }
 
   void _onStageChanged(VPNStage? stage) {
@@ -339,14 +425,17 @@ class VpnProvider extends ChangeNotifier {
         _stageName = 'Connected';
         _connectedAt ??= DateTime.now();
         _reconnectCount = 0;
+        _resetSpeedTracking();
         _saveConnectionState();
         _startTimer();
+        if (_selectedServer != null) _addRecentServer(_selectedServer!);
         Log.d('VPN CONNECTED to ${_selectedServer?.hostName} (${_selectedServer?.ip}), ${_selectedServer?.countryLong}');
         if (_connectionCompleter != null && !_connectionCompleter!.isCompleted) {
           _connectionCompleter!.complete(true);
         }
         break;
       case VPNStage.disconnected:
+        _resetSpeedTracking();
         Log.d('VPN DISCONNECTED, pendingSwitch=${_pendingSwitchServer?.hostName}');
         _connectedAt = null;
         _clearConnectionState();
@@ -542,6 +631,32 @@ class VpnProvider extends ChangeNotifier {
         Log.error('Refresh: background refresh failed', e);
       }
     });
+  }
+
+  void _addRecentServer(VpnServer server) {
+    _recentServers.removeWhere((s) => s.ip == server.ip);
+    _recentServers.insert(0, server);
+    if (_recentServers.length > 5) {
+      _recentServers = _recentServers.sublist(0, 5);
+    }
+    _saveRecentServers();
+  }
+
+  Future<void> _saveRecentServers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _recentServers.map((s) => jsonEncode(s.toJson())).toList();
+    await prefs.setStringList('recent_servers', jsonList);
+  }
+
+  Future<void> _loadRecentServers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = prefs.getStringList('recent_servers');
+    if (jsonList != null) {
+      _recentServers = jsonList
+          .map((s) => VpnServer.fromJson(jsonDecode(s)))
+          .toList();
+    }
+    Log.d('Recent: loaded ${_recentServers.length} recent servers');
   }
 
   Future<void> _loadFavorites() async {
