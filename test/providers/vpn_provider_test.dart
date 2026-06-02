@@ -273,6 +273,56 @@ void main() {
     });
   });
 
+  group('VpnProvider.autoConnect', () {
+    test('does nothing when service is not initialized', () async {
+      final provider = VpnProvider();
+      await provider.autoConnect();
+      // Should return early, no crash
+      expect(provider.connectionStatus, ConnectionStatus.disconnected);
+    });
+  });
+
+  group('VpnProvider speed tracking', () {
+    test('starts with zero download speed', () {
+      final provider = VpnProvider();
+      expect(provider.downloadSpeed, 0);
+    });
+
+    test('starts with zero upload speed', () {
+      final provider = VpnProvider();
+      expect(provider.uploadSpeed, 0);
+    });
+  });
+
+  group('VpnProvider.connectionQuality', () {
+    test('starts as unknown', () {
+      final provider = VpnProvider();
+      expect(provider.connectionQuality, ConnectionQuality.unknown);
+    });
+  });
+
+  group('VpnProvider.recentServers', () {
+    test('starts empty', () {
+      final provider = VpnProvider();
+      expect(provider.recentServers, isEmpty);
+    });
+  });
+
+  group('ConnectionQuality enum', () {
+    test('has all expected values', () {
+      expect(ConnectionQuality.values, containsAll([
+        ConnectionQuality.good,
+        ConnectionQuality.fair,
+        ConnectionQuality.poor,
+        ConnectionQuality.unknown,
+      ]));
+    });
+
+    test('has exactly 4 values', () {
+      expect(ConnectionQuality.values.length, 4);
+    });
+  });
+
   group('ConnectionStatus enum', () {
     test('has all expected values', () {
       expect(ConnectionStatus.values, containsAll([
