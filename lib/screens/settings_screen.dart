@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../theme/app_theme.dart';
+import 'data_usage_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -34,6 +35,11 @@ class SettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  _SettingsTile(
+                    icon: Icons.data_usage_rounded,
+                    title: 'Data Usage',
+                    onTap: () => _push(context, const DataUsageScreen()),
+                  ),
                   _SettingsTile(
                     icon: Icons.info_outline_rounded,
                     title: 'About',
