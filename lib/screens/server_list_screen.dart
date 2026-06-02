@@ -15,6 +15,7 @@ class ServerListScreen extends StatefulWidget {
 
 class _ServerListScreenState extends State<ServerListScreen> {
   String _searchQuery = '';
+  String? _selectedCountry;
   final _searchController = TextEditingController();
 
   @override
@@ -109,8 +110,56 @@ class _ServerListScreenState extends State<ServerListScreen> {
                 ),
               ),
 
+              // Country filter chips
+              if (provider.servers.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 44,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: const Text('All'),
+                            selected: _selectedCountry == null,
+                            onSelected: (_) => setState(() => _selectedCountry = null),
+                            selectedColor: AppTheme.accentCyan.withValues(alpha: 0.2),
+                            labelStyle: TextStyle(
+                              color: _selectedCountry == null ? AppTheme.accentCyan : AppTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                            backgroundColor: AppTheme.cardDark,
+                            side: BorderSide(
+                              color: _selectedCountry == null ? AppTheme.accentCyan.withValues(alpha: 0.4) : AppTheme.dividerColor,
+                            ),
+                          ),
+                        ),
+                        ..._getUniqueCountries(provider.servers).map((country) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(country),
+                            selected: _selectedCountry == country,
+                            onSelected: (_) => setState(() => _selectedCountry = _selectedCountry == country ? null : country),
+                            selectedColor: AppTheme.accentCyan.withValues(alpha: 0.2),
+                            labelStyle: TextStyle(
+                              color: _selectedCountry == country ? AppTheme.accentCyan : AppTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                            backgroundColor: AppTheme.cardDark,
+                            side: BorderSide(
+                              color: _selectedCountry == country ? AppTheme.accentCyan.withValues(alpha: 0.4) : AppTheme.dividerColor,
+                            ),
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
+                ),
+
               // Quick connect (fastest server)
-              if (_searchQuery.isEmpty && servers.isNotEmpty)
+              if (_searchQuery.isEmpty && _selectedCountry == null && servers.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -120,6 +169,30 @@ class _ServerListScreenState extends State<ServerListScreen> {
                     ),
                   ),
                 ),
+
+              // Recently connected
+              if (provider.recentServers.isNotEmpty && _searchQuery.isEmpty && _selectedCountry == null) ...[
+                const SliverToBoxAdapter(
+                  child: _SectionHeader(title: 'Recently Connected'),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final server = provider.recentServers[index];
+                      return ServerCard(
+                        server: server,
+                        isSelected: provider.selectedServer?.ip == server.ip,
+                        isFavorite: provider.isFavorite(server),
+                        isOnline: provider.isOnline(server),
+                        maxSpeed: maxSpeed,
+                        onTap: () => _selectAndConnect(provider, server),
+                        onFavoriteTap: () => provider.toggleFavorite(server),
+                      );
+                    },
+                    childCount: provider.recentServers.length,
+                  ),
+                ),
+              ],
 
               // Favorites section
               if (favorites.isNotEmpty && _searchQuery.isEmpty) ...[
@@ -214,14 +287,26 @@ class _ServerListScreenState extends State<ServerListScreen> {
   }
 
   List<VpnServer> _filteredServers(List<VpnServer> servers) {
-    if (_searchQuery.isEmpty) return servers;
-    final query = _searchQuery.toLowerCase();
-    return servers
-        .where((s) =>
-            s.countryLong.toLowerCase().contains(query) ||
-            s.countryShort.toLowerCase().contains(query) ||
-            s.hostName.toLowerCase().contains(query))
-        .toList();
+    var filtered = servers;
+    if (_selectedCountry != null) {
+      filtered = filtered.where((s) => s.countryLong == _selectedCountry).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered
+          .where((s) =>
+              s.countryLong.toLowerCase().contains(query) ||
+              s.countryShort.toLowerCase().contains(query) ||
+              s.hostName.toLowerCase().contains(query))
+          .toList();
+    }
+    return filtered;
+  }
+
+  List<String> _getUniqueCountries(List<VpnServer> servers) {
+    final countries = servers.map((s) => s.countryLong).toSet().toList();
+    countries.sort();
+    return countries;
   }
 }
 
