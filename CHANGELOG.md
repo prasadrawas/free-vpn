@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.5+6 (2026-06-02)
+
+### Bug Fixes
+- Fixed home screen layout overflow on smaller screens by rebalancing flex distribution
+- Added null safety guard for VPN connection service in auto-connect
+
+### UX Improvements
+- Server selector now shows a styled "Change" button instead of a plain chevron icon
+- Added shimmer animation on server selector to draw attention on first launch
+
+### Chore
+- Removed integration tests and package
+- Added Play Store feature graphic (1024x500)
+
+## 1.0.4+5 (2026-06-02)
+
+### Bug Fixes
+- Fixed status display overflow on smaller screens
+- Version bump for Play Store release
+
 ## 1.0.3+5 (2026-06-02)
 
 ### New Features

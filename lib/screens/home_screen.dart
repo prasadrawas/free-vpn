@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -271,47 +273,111 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _ServerSelector extends StatelessWidget {
+class _ServerSelector extends StatefulWidget {
   final VpnProvider provider;
 
   const _ServerSelector({required this.provider});
 
   @override
+  State<_ServerSelector> createState() => _ServerSelectorState();
+}
+
+class _ServerSelectorState extends State<_ServerSelector>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _shimmerController;
+  late final Animation<double> _shimmerAnimation;
+  bool _hasInteracted = false;
+  Timer? _startTimer;
+  Timer? _stopTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+    // Start shimmer after a short delay, repeat a few times
+    _startTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted && !_hasInteracted) {
+        _shimmerController.repeat();
+        _stopTimer = Timer(const Duration(seconds: 6), () {
+          if (mounted) _shimmerController.stop();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _startTimer?.cancel();
+    _stopTimer?.cancel();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  void _openServerList() {
+    setState(() => _hasInteracted = true);
+    _shimmerController.stop();
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const ServerListScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final server = provider.selectedServer;
+    final server = widget.provider.selectedServer;
 
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const ServerListScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 1),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 400),
-          ),
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.cardDark,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppTheme.dividerColor,
-          ),
-        ),
+      onTap: _openServerList,
+      child: AnimatedBuilder(
+        animation: _shimmerAnimation,
+        builder: (context, child) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.cardDark,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: !_hasInteracted && _shimmerController.isAnimating
+                    ? AppTheme.accentCyan.withValues(alpha: 0.4)
+                    : AppTheme.dividerColor,
+              ),
+              gradient: !_hasInteracted && _shimmerController.isAnimating
+                  ? LinearGradient(
+                      begin: Alignment(_shimmerAnimation.value - 1, 0),
+                      end: Alignment(_shimmerAnimation.value, 0),
+                      colors: [
+                        AppTheme.cardDark,
+                        AppTheme.accentCyan.withValues(alpha: 0.06),
+                        AppTheme.cardDark,
+                      ],
+                    )
+                  : null,
+            ),
+            child: child,
+          );
+        },
         child: Row(
           children: [
             if (server != null) ...[
@@ -359,7 +425,7 @@ class _ServerSelector extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  provider.isLoadingServers
+                  widget.provider.isLoadingServers
                       ? 'Loading servers...'
                       : 'Select a server',
                   style: const TextStyle(
@@ -369,9 +435,34 @@ class _ServerSelector extends StatelessWidget {
                 ),
               ),
             ],
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppTheme.textSecondary,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppTheme.accentCyan.withValues(alpha: 0.4),
+                ),
+                color: AppTheme.accentCyan.withValues(alpha: 0.08),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Change',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.accentCyan,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppTheme.accentCyan,
+                    size: 16,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -25,6 +25,7 @@ A free, open-source VPN client for Android built with Flutter. Connects to [VPN 
 - Persistent VPN notification with server name and stop button
 - Privacy policy, terms of service, VPN disclaimer (WebView)
 - Firebase Crashlytics and Analytics
+- Improved server selector UX with "Change" button and shimmer hint
 - 115+ unit tests
 
 ## Screenshots
@@ -130,6 +131,7 @@ docs/
     style.css             # Styles
     script.js             # Animations
     og-image.png          # Social media preview
+    feature-graphic.png   # Play Store feature graphic (1024x500)
   legal/
     privacy.html          # Privacy policy
     terms.html            # Terms of service

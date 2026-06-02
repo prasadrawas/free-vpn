@@ -32,7 +32,7 @@ Single-provider architecture using `ChangeNotifierProvider<VpnProvider>` at the 
 
 **Screens:**
 - `SplashScreen` — 1.5s branded splash with creator credits
-- `HomeScreen` — connect button, timer, speed display, quality indicator, server selector
+- `HomeScreen` — connect button, timer, speed display, quality indicator, server selector (with "Change" button and first-launch shimmer animation)
 - `ServerListScreen` — country filter chips, search, recently connected, favorites, all servers
 - `SettingsScreen` — data usage, about, legal pages (WebView)
 - `DataUsageScreen` — daily/weekly/monthly usage stats
@@ -90,3 +90,9 @@ Server list re-fetches every 5 minutes via `Timer.periodic`. Skipped during auto
 | `firebase_analytics` | Anonymous usage analytics |
 | `webview_flutter` | Legal pages loaded from website |
 | `package_info_plus` | Dynamic version display in About |
+
+## Workflow Rules
+
+When a feature, bug fix, or UX improvement is finalized, always update the following files before committing:
+- **CHANGELOG.md** - Add an entry under the current version with the change description
+- **README.md** - Update if the change adds, removes, or modifies a user-facing feature listed there

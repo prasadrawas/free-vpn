@@ -11,46 +11,42 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  testWidgets('Home screen renders with app name', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => VpnProvider(),
-        child: MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const HomeScreen(),
-        ),
+  Widget buildHomeScreen() {
+    return ChangeNotifierProvider(
+      create: (_) => VpnProvider(),
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: const HomeScreen(),
       ),
     );
+  }
+
+  Future<void> disposeTree(WidgetTester tester) async {
+    // Replace widget tree to dispose all controllers and cancel timers
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  }
+
+  testWidgets('Home screen renders with app name', (WidgetTester tester) async {
+    await tester.pumpWidget(buildHomeScreen());
     await tester.pump();
 
     expect(find.text('FreeVPN'), findsOneWidget);
+
+    await disposeTree(tester);
   });
 
   testWidgets('Home screen shows connect button', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => VpnProvider(),
-        child: MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const HomeScreen(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildHomeScreen());
     await tester.pump();
 
     expect(find.text('CONNECT'), findsOneWidget);
+
+    await disposeTree(tester);
   });
 
   testWidgets('Home screen shows server selector', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => VpnProvider(),
-        child: MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const HomeScreen(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildHomeScreen());
     await tester.pump();
 
     // Should show loading or select server text
@@ -58,35 +54,35 @@ void main() {
       find.textContaining(RegExp('Loading servers|Select a server')),
       findsOneWidget,
     );
+
+    await disposeTree(tester);
   });
 
   testWidgets('Home screen shows settings icon', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => VpnProvider(),
-        child: MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const HomeScreen(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildHomeScreen());
     await tester.pump();
 
     expect(find.byIcon(Icons.settings_rounded), findsOneWidget);
+
+    await disposeTree(tester);
   });
 
   testWidgets('Home screen shows creator text', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => VpnProvider(),
-        child: MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const HomeScreen(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildHomeScreen());
     await tester.pump();
 
     expect(find.text('Created by Prasad Rawas'), findsOneWidget);
+
+    await disposeTree(tester);
+  });
+
+  testWidgets('Home screen shows Change button on server selector',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(buildHomeScreen());
+    await tester.pump();
+
+    expect(find.text('Change'), findsOneWidget);
+
+    await disposeTree(tester);
   });
 }
