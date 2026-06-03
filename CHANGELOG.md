@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6+7 (2026-06-03)
+
+### UX Improvements
+- Added notification permission check on first VPN connection — shows a SnackBar with "ENABLE" shortcut to system notification settings when permission is denied
+
 ## 1.0.5+6 (2026-06-02)
 
 ### Bug Fixes
@@ -9,7 +14,6 @@
 ### UX Improvements
 - Server selector now shows a styled "Change" button instead of a plain chevron icon
 - Added shimmer animation on server selector to draw attention on first launch
-- Added notification permission check on first VPN connection — shows a non-intrusive SnackBar with "ENABLE" shortcut to system notification settings when permission is denied
 
 ### Chore
 - Removed integration tests and package
