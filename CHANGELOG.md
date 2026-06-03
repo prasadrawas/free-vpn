@@ -9,6 +9,7 @@
 ### UX Improvements
 - Server selector now shows a styled "Change" button instead of a plain chevron icon
 - Added shimmer animation on server selector to draw attention on first launch
+- Added notification permission check on first VPN connection — shows a non-intrusive SnackBar with "ENABLE" shortcut to system notification settings when permission is denied
 
 ### Chore
 - Removed integration tests and package
