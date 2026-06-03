@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -336,6 +337,93 @@ void main() {
 
     test('has exactly 5 values', () {
       expect(ConnectionStatus.values.length, 5);
+    });
+  });
+
+  group('VpnProvider.isNotificationPermissionGranted', () {
+    const channel = MethodChannel('com.prasadrawas.freevpn/battery');
+
+    testWidgets('returns true when platform returns true', (tester) async {
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'isNotificationPermissionGranted') return true;
+        return null;
+      });
+
+      final provider = VpnProvider();
+      final granted = await provider.isNotificationPermissionGranted();
+      expect(granted, true);
+
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    testWidgets('returns false when platform returns false', (tester) async {
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'isNotificationPermissionGranted') return false;
+        return null;
+      });
+
+      final provider = VpnProvider();
+      final granted = await provider.isNotificationPermissionGranted();
+      expect(granted, false);
+
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    testWidgets('returns true when platform throws', (tester) async {
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'isNotificationPermissionGranted') {
+          throw PlatformException(code: 'ERROR');
+        }
+        return null;
+      });
+
+      final provider = VpnProvider();
+      final granted = await provider.isNotificationPermissionGranted();
+      expect(granted, true);
+
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+  });
+
+  group('VpnProvider.openNotificationSettings', () {
+    const channel = MethodChannel('com.prasadrawas.freevpn/battery');
+
+    testWidgets('calls platform method without error', (tester) async {
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'openNotificationSettings') return null;
+        return null;
+      });
+
+      final provider = VpnProvider();
+      await provider.openNotificationSettings();
+      // Should complete without error
+
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    testWidgets('does not throw when platform throws', (tester) async {
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'openNotificationSettings') {
+          throw PlatformException(code: 'ERROR');
+        }
+        return null;
+      });
+
+      final provider = VpnProvider();
+      await provider.openNotificationSettings();
+      // Should not throw
+
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
   });
 
