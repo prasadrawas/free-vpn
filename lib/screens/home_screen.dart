@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _offlineShown = false;
   bool _batteryCheckDone = false;
+  bool _notificationCheckDone = false;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +48,14 @@ class _HomeScreenState extends State<HomeScreen> {
             _batteryCheckDone = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _checkBatteryOptimization();
+            });
+          }
+
+          // Check notification permission on first connection
+          if (isConnected && !_notificationCheckDone) {
+            _notificationCheckDone = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _checkNotificationPermission(provider);
             });
           }
 
@@ -218,6 +227,40 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Disable'),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _checkNotificationPermission(VpnProvider provider) async {
+    final granted = await provider.isNotificationPermissionGranted();
+    if (granted) return;
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.notifications_off_rounded, color: AppTheme.accentOrange, size: 20),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Notifications are off. Enable them to see VPN connection status.',
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppTheme.surfaceDark,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: 'ENABLE',
+          textColor: AppTheme.accentCyan,
+          onPressed: () {
+            provider.openNotificationSettings();
+          },
+        ),
       ),
     );
   }

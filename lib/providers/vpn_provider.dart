@@ -153,6 +153,23 @@ class VpnProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> isNotificationPermissionGranted() async {
+    try {
+      final granted = await _channel.invokeMethod<bool>('isNotificationPermissionGranted');
+      return granted ?? true;
+    } on PlatformException {
+      return true; // Pre-Android 13 doesn't need this
+    }
+  }
+
+  Future<void> openNotificationSettings() async {
+    try {
+      await _channel.invokeMethod('openNotificationSettings');
+    } on PlatformException {
+      // Ignore
+    }
+  }
+
   Future<void> connectToServer([VpnServer? server]) async {
     final target = server ?? _selectedServer;
     if (target == null) {

@@ -55,6 +55,20 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(null)
                 }
+                "isNotificationPermissionGranted" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        result.success(ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+                    } else {
+                        result.success(true)
+                    }
+                }
+                "openNotificationSettings" -> {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    }
+                    startActivity(intent)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }
