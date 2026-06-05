@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.6+7 (2026-06-03)
+## 1.0.7+8 (2026-06-05)
 
 ### Bug Fixes
 - Fixed WebView legal pages (Privacy, Terms, Disclaimer) showing infinite spinner on network failure — now shows error state with retry button
