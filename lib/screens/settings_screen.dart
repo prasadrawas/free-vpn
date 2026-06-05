@@ -274,19 +274,40 @@ class _WebViewPage extends StatefulWidget {
 class _WebViewPageState extends State<_WebViewPage> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
+    _initWebView();
+  }
+
+  void _initWebView() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(AppTheme.primaryDark)
       ..setNavigationDelegate(NavigationDelegate(
         onPageFinished: (_) {
-          if (mounted) setState(() => _isLoading = false);
+          if (mounted && !_hasError) setState(() => _isLoading = false);
+        },
+        onWebResourceError: (error) {
+          // Only handle main frame errors, not subresource failures
+          if (error.isForMainFrame ?? true) {
+            if (mounted) setState(() { _isLoading = false; _hasError = true; });
+          }
+        },
+        onHttpError: (error) {
+          if (error.response?.statusCode != null && error.response!.statusCode >= 400) {
+            if (mounted) setState(() { _isLoading = false; _hasError = true; });
+          }
         },
       ))
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  void _retry() {
+    setState(() { _isLoading = true; _hasError = false; });
+    _controller.loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -298,10 +319,53 @@ class _WebViewPageState extends State<_WebViewPage> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          if (!_hasError) WebViewWidget(controller: _controller),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(color: AppTheme.accentCyan),
+            ),
+          if (_hasError)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.wifi_off_rounded,
+                      color: AppTheme.textSecondary,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Failed to load page',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Check your internet connection and try again.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton.icon(
+                      onPressed: _retry,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Retry'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.accentCyan,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
