@@ -2,6 +2,9 @@
 
 ## 1.0.6+7 (2026-06-03)
 
+### Bug Fixes
+- Fixed WebView legal pages (Privacy, Terms, Disclaimer) showing infinite spinner on network failure — now shows error state with retry button
+
 ### UX Improvements
 - Added notification permission check on first VPN connection — shows a SnackBar with "ENABLE" shortcut to system notification settings when permission is denied
 
